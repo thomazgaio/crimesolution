@@ -1,12 +1,13 @@
 package main.java.solution;
 
+import java.util.HashSet;
 import java.util.Random;
-
-import org.apache.commons.lang.ArrayUtils; 	
+import java.util.Set; 	
 
 public class Solution {
 
-	final static String[] murder = {"Donald","Tokio","Trezoitão"};
+//	final static String[] murder = {"Donald","Tokio","Trezoitão"};
+	final static int[] murder = {1,3,2};
 
 	public static void main(String[] args) {
 		
@@ -15,19 +16,23 @@ public class Solution {
 		String[] locations = {"Redmond", "Palo Alto", "San Francisco", "Tokio", "Restaurante", "São Paulo", "Cupertino", "Helsinki", "Maida Vale", "Toronto"};
 		String[] weapons = {"Peixeira", "DynaTAC 8000X", "Trezoitão", "Trebuchet", "Maça", "Gládio"};
 		
+		Set<Integer> wrongSuspects = new HashSet<Integer>();
+		Set<Integer> wrongLocations = new HashSet<Integer>();
+		Set<Integer> wrongWeapons = new HashSet<Integer>();
+		
 		int answer = Integer.MAX_VALUE;
-		String[] guess = null;
+		int[] guess = null;
 		
 		while(answer != 0) {
-			guess = nextGuess(guess, answer, suspects, locations, weapons);
+			guess = nextGuess(guess, answer, suspects, locations, weapons, wrongSuspects, wrongLocations, wrongWeapons);
 			answer = question(guess);
 			printAnswer(answer);
 		}
 		
-		printSolution(guess);
+		printSolution(guess, suspects, locations, weapons);
 	}
 
-	private static String[] nextGuess(String[] guess, int answer, String[] suspects, String[] locations, String[] weapons) {
+	private static int[] nextGuess(int[] guess, int answer, String[] suspects, String[] locations, String[] weapons, Set<Integer> wrongSuspects, Set<Integer> wrongLocations, Set<Integer> wrongWeapons) {
 		Random r = new Random();
 		
 		if(guess == null) {
@@ -35,46 +40,57 @@ public class Solution {
 		}
 		
 		if(answer == 1) {
-			suspects = (String[]) ArrayUtils.removeElement(suspects, guess[0]);
-			guess[0] = suspects[r.nextInt(suspects.length)];
+			wrongSuspects.add(guess[0]);
+			int nextSuspect = r.nextInt(suspects.length);
+			while(wrongSuspects.contains(new Integer(nextSuspect))){
+				nextSuspect = r.nextInt(suspects.length);
+			}
+			guess[0] = nextSuspect;
 		} else if(answer == 2) {
-			locations = (String[]) ArrayUtils.removeElement(locations, guess[1]);
-			guess[1] = locations[r.nextInt(locations.length)];
+			wrongLocations.add(guess[1]);
+			int nextLocation = r.nextInt(locations.length);
+			while(wrongLocations.contains(new Integer(nextLocation))){
+				nextLocation = r.nextInt(locations.length);
+			}
+			guess[1] = nextLocation;
 		} else if(answer == 3) {
-			weapons = (String[]) ArrayUtils.removeElement(weapons, guess[2]);
-			guess[2] = weapons[r.nextInt(weapons.length)];
+			wrongWeapons.add(guess[2]);
+			int nextWeapon = r.nextInt(weapons.length);
+			while(wrongWeapons.contains(new Integer(nextWeapon))){
+				nextWeapon = r.nextInt(weapons.length);
+			}
+			guess[2] = nextWeapon;
 		}
 		
-		printGuess(guess);
+		printGuess(guess, suspects, locations, weapons);
 		
 		return guess;
 	}
 
-	private static int question(String[] guess) {
+	private static int question(int[] guess) {
 		for (int i = 0; i < guess.length; i++) {
-			if(!guess[i].equals(murder[i])) {
+			if(guess[i] != murder[i]) {
 				return i+1;
 			}
 		}
 		return 0;
 	}
 
-	private static String[] getFirstGuess(Random r, String[] suspects, String[] locations, String[] weapons) {
-		String[] rv = {suspects[r.nextInt(suspects.length)], locations[r.nextInt(locations.length)], weapons[r.nextInt(weapons.length)]};
-		return rv;
+	private static int[] getFirstGuess(Random r, String[] suspects, String[] locations, String[] weapons) {
+		return new int[] {r.nextInt(suspects.length), r.nextInt(locations.length), r.nextInt(weapons.length)};
 	}
 
-	private static void printGuess(String[] guess) {
-		System.out.println("Trying: ("+guess[0]+", "+guess[1]+", "+guess[2]+")");
+	private static void printGuess(int[] guess, String[] suspects, String[] locations, String[] weapons) {
+		System.out.println("Trying: ("+suspects[guess[0]]+", "+locations[guess[1]]+", "+weapons[guess[2]]+")");
 	}
 	
 	private static void printAnswer(int answer) {
 		System.out.println("Answer: "+ answer);
 	}
 	
-	private static void printSolution(String[] solution) {
-		System.out.println("Murderer: " + solution[0]);
-		System.out.println("Location: " + solution[1]);
-		System.out.println("Weapon: " + solution[2]);
+	private static void printSolution(int[] solution, String[] suspects, String[] locations, String[] weapons) {
+		System.out.println("Murderer: " + suspects[solution[0]]);
+		System.out.println("Location: " + locations[solution[1]]);
+		System.out.println("Weapon: " + weapons[solution[2]]);
 	}
 }
